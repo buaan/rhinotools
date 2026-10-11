@@ -7,6 +7,12 @@ from rhinoagent import logic  # noqa: E402
 
 
 class LogicTests(unittest.TestCase):
+    def test_xyz_accepts_point_like_and_tuple(self):
+        class P(object):
+            X, Y, Z = 1.0, 2.0, 3.0
+        self.assertEqual(logic.xyz(P()), (1.0, 2.0, 3.0))
+        self.assertEqual(logic.xyz((4, 5, 6)), (4, 5, 6))
+
     def test_unique_sorted(self):
         self.assertEqual(logic.unique_sorted([3, 1, 1.0000000001, 2]), [1, 2, 3])
 

@@ -2,6 +2,16 @@
 
 Points are (x, y, z) tuples.  Boxes are (xmin, ymin, xmax, ymax).
 """
+from __future__ import division
+
+
+
+def xyz(p):
+    """Rhino Point3d or tuple -> (x, y, z) floats (IronPython-safe, no iteration)."""
+    try:
+        return (p.X, p.Y, p.Z)
+    except AttributeError:
+        return (p[0], p[1], p[2])
 
 
 def unique_sorted(values, tol=1e-6):

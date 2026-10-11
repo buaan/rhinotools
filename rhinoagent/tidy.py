@@ -1,4 +1,6 @@
 """Geometry hygiene: join loose lines into polylines, group parts, audit."""
+from __future__ import division
+
 import rhinoscriptsyntax as rs
 
 from . import logic
@@ -68,7 +70,7 @@ def audit(ids=None, short=None):
     for i in ids:
         if rs.IsCurve(i):
             bb = rs.BoundingBox(i)
-            key = (round(rs.CurveLength(i), 4),) + tuple(round(c, 3) for c in bb[0] + bb[6])
+            key = (round(rs.CurveLength(i), 4),) + tuple(round(c, 3) for c in logic.xyz(bb[0]) + logic.xyz(bb[6]))
             dups += key in seen
             seen.add(key)
     if dups:

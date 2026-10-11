@@ -11,6 +11,8 @@ Rules baked in:
 Written for CPlane-parallel (XY) geometry.  For other planes, orient the
 part to the World XY plane first (rs.OrientObject) or project to it.
 """
+from __future__ import division
+
 import rhinoscriptsyntax as rs
 
 from . import logic
@@ -69,7 +71,7 @@ def _chain_v(ys, x, off, z, ids):
 
 def _radial(circle_id, ids, off):
     """Diameter dimension for a circle; falls back to a leader with text."""
-    c = rs.CircleCenterPoint(circle_id)
+    c = logic.xyz(rs.CircleCenterPoint(circle_id))
     r = rs.CircleRadius(circle_id)
     try:
         import Rhino
@@ -95,8 +97,8 @@ def dimension_part(outline, holes=(), name=None, text_height=None):
     Returns the list of created dimension ids (also grouped as `name`).
     """
     bb = rs.BoundingBox(outline)
-    x0, y0, z = bb[0]
-    x1, y1 = bb[6][0], bb[6][1]
+    x0, y0, z = logic.xyz(bb[0])
+    x1, y1 = logic.xyz(bb[6])[:2]
     th = text_height or max(x1 - x0, y1 - y0) * 0.03
     off = th * 3
     ensure_style(th)
@@ -105,12 +107,12 @@ def dimension_part(outline, holes=(), name=None, text_height=None):
     rs.EnableRedraw(False)
     ids = []
     try:
-        pts = [tuple(p) for p in (rs.PolylineVertices(outline) or [])] \
+        pts = [logic.xyz(p) for p in (rs.PolylineVertices(outline) or [])] \
             if rs.IsPolyline(outline) else [(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z)]
 
         circles = [h for h in holes if rs.IsCircle(h)]
         others = [h for h in holes if not rs.IsCircle(h)]
-        centres = [tuple(rs.CircleCenterPoint(c)) for c in circles]
+        centres = [logic.xyz(rs.CircleCenterPoint(c)) for c in circles]
         for h in others:
             hb = rs.BoundingBox(h)
             centres.append(((hb[0][0] + hb[6][0]) / 2, (hb[0][1] + hb[6][1]) / 2, z))

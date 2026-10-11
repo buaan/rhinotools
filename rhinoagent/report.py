@@ -1,6 +1,10 @@
 """Measure / extract scene information as JSON so an agent can read it back."""
+from __future__ import division
+
 import json
 import rhinoscriptsyntax as rs
+
+from . import logic
 
 
 def _r(v, n=4):
@@ -12,9 +16,10 @@ def describe(obj):
          "name": rs.ObjectName(obj), "groups": rs.ObjectGroups(obj) or []}
     bb = rs.BoundingBox(obj)
     if bb:
-        d["bbox_min"] = [_r(c) for c in bb[0]]
-        d["bbox_max"] = [_r(c) for c in bb[6]]
-        d["size"] = [_r(bb[6][i] - bb[0][i]) for i in range(3)]
+        lo, hi = logic.xyz(bb[0]), logic.xyz(bb[6])
+        d["bbox_min"] = [_r(c) for c in lo]
+        d["bbox_max"] = [_r(c) for c in hi]
+        d["size"] = [_r(hi[i] - lo[i]) for i in range(3)]
     if rs.IsCurve(obj):
         d["length"] = _r(rs.CurveLength(obj))
         d["closed"] = bool(rs.IsCurveClosed(obj))
@@ -24,7 +29,7 @@ def describe(obj):
             d["area"] = _r(a[0]) if a else None
         if rs.IsCircle(obj):
             d["radius"] = _r(rs.CircleRadius(obj))
-            d["center"] = [_r(c) for c in rs.CircleCenterPoint(obj)]
+            d["center"] = [_r(c) for c in logic.xyz(rs.CircleCenterPoint(obj))]
         if rs.IsPolyline(obj):
             d["vertices"] = len(rs.PolylineVertices(obj) or [])
     elif rs.IsSurface(obj) or rs.IsPolysurface(obj):
@@ -48,8 +53,8 @@ def scene_report(ids=None, details=True):
            "object_count": len(ids), "by_type_code": counts, "by_layer": layers}
     bb = rs.BoundingBox(ids) if ids else None
     if bb:
-        rep["bbox_min"] = [_r(c) for c in bb[0]]
-        rep["bbox_max"] = [_r(c) for c in bb[6]]
+        rep["bbox_min"] = [_r(c) for c in logic.xyz(bb[0])]
+        rep["bbox_max"] = [_r(c) for c in logic.xyz(bb[6])]
     if details:
         rep["objects"] = [describe(i) for i in ids]
     return rep
