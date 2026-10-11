@@ -101,3 +101,14 @@ Coming soon
 ### Notes
 
 I have a 1x2' laser cutter and a 4x8' router table.
+
+### Rhino agent (`rhinoagent/` + `.claude/agents/rhino.md`)
+
+A Claude Code subagent for fast Rhino work (model, measure, extract info, analyze, dimension). It writes small RhinoPython scripts and runs them in your open Rhino (`rhinocode script file.py` on Rhino 8) - so use it from Claude Code running **on your machine**, not a cloud session.
+
+* `rhinoagent/dims.py` - native dimension objects, shared style, chained dims over unique coordinates, one diameter dim per hole size, grouped on layer `Cotas`.
+* `rhinoagent/tidy.py` - join loose lines into polylines, group outline+holes, audit scene problems.
+* `rhinoagent/report.py` - JSON scene/object measurements the agent reads back.
+* `rhinoagent/logic.py` - pure-Python decisions, unit-tested: `python -m unittest discover -s tests`.
+
+Status: `logic.py` is tested; the Rhino-facing modules are syntax-checked only and need a first run in Rhino (radial dimensions especially, which use RhinoCommon and fall back to a leader).
